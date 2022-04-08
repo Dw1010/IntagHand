@@ -67,7 +67,7 @@ python apps/demo.py --img_path demo/ --save_path demo/
 ```
 Results will be stored in folder `./demo`
 
-**Noted**: We don't operate hand detection, so hands are expected to be roughly at center of image and take approximately 70-90% of image area.
+**Noted**: We don't operate hand detection, so hands are expected to be roughly at the center of image and take approximately 70-90% of the image area.
 
 ## Evaluation
 

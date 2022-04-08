@@ -67,6 +67,8 @@ python apps/demo.py --img_path demo/ --save_path demo/
 ```
 Results will be stored in folder `./demo`
 
+**Noted**: We don't operate hand detection, so hands are expected to be roughly at center of image and take approximately 70-90% of image area.
+
 ## Evaluation
 
 1. Download [InterHand2.6M](https://mks0601.github.io/InterHand2.6M/) dataset and unzip it. (**Noted**: we used the `v1.0_5fps` version and `H+M` subset for training and evaluating)

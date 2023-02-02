@@ -8,6 +8,12 @@ Tsinghua University & Hisense Inc.
 
 CVPR 2022 (Oral)
 
+
+
+**2023.02.02 Update: add an example of training code**
+
+
+
 ![pic](http://www.liuyebin.com/IntagHand/assets/results2.png)
 
 ## Requirements
@@ -35,7 +41,7 @@ CVPR 2022 (Oral)
 - Download  necessary assets (including the pre-trained models) from [misc.tar.gz](https://github.com/Dw1010/IntagHand/releases/download/v0.0/misc.tar.gz) and unzip it.
 - Register and download [MANO](https://mano.is.tue.mpg.de/)  data. Put `MANO_LEFT.pkl` and `MANO_RIGHT.pkl` in `misc/mano`
 
-After collecting the above necessary files, the directory structure of ./misc is expected as follows:
+After collecting the above necessary files, the directory structure of `./misc` is expected as follows:
 
 ```
 ./misc
@@ -68,6 +74,31 @@ python apps/demo.py --img_path demo/ --save_path demo/
 Results will be stored in folder `./demo`
 
 **Noted**: We don't operate hand detection, so hands are expected to be roughly at the center of image and take approximately 70-90% of the image area.
+
+## Training
+
+1. Download [InterHand2.6M](https://mks0601.github.io/InterHand2.6M/) dataset and unzip it. (**Noted**: we used the `v1.0_5fps` version and `H+M` subset for training and evaluating)
+
+2. Process the dataset by :
+```
+python dataset/interhand.py --data_path PATH_OF_INTERHAND2.6M --save_path ./interhand2.6m/
+```
+Replace `PATH_OF_INTERHAND2.6M` with your own store path of [InterHand2.6M](https://mks0601.github.io/InterHand2.6M/) dataset. 
+
+3. Try the training code:
+```
+python apps/train.py utils/defaults.yaml
+```
+
+The output model and TensorBoard log file would be store in `./output`.
+If you have multiple GPUs on your device, set `--gpu` to use them.  For example, use:
+
+```
+python apps/train.py utils/defaults.yaml --gpu 0,1,2,3
+```
+to train model on 4 GPUs.
+
+4. We highly recommend you to try different loss weight and fine-turn the model with lower learning rate to get better result. The training configuration can be modified in `utils/defaults.yaml`.
 
 ## Evaluation
 

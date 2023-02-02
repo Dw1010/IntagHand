@@ -8,12 +8,12 @@ MISC:
   UPSAMPLE_PATH: "misc/upsample.pkl"
 MODEL:
   ENCODER_TYPE: "resnet50"
-  DECONV_DIMS: [128, 128, 128, 128]
-  IMG_DIMS: [128, 64, 32]
-  GCN_IN_DIM: [64, 128, 128, 64, 64]
-  GCN_OUT_DIM: [128, 128, 64, 64, 32]
+  DECONV_DIMS: [256, 256, 256, 256]
+  IMG_DIMS: [256, 128, 64]
+  GCN_IN_DIM: [512, 256, 128]
+  GCN_OUT_DIM: [256, 128, 64]
   ENCODER_PRETRAIN_PATH: "none"
-  freeze_upsample: False
+  freeze_upsample: True
   graph_k: 2
   graph_layer_num: 4
 MODEL_PARAM:
@@ -21,21 +21,21 @@ MODEL_PARAM:
   OPTIM_PATH: "none"
   LrSc_PATH: "none"
 DATASET:
-  INTERHAND_PATH: "none"
+  INTERHAND_PATH: "./interhand2.6m/"
 DATA_AUGMENT:
   THETA: 90
-  SCALE: 0.2
+  SCALE: 0.1
   UV: 0.0
 TRAIN:
   DIST_PORT: 12345
   OPTIM: 'adam'
   current_epoch: 0
-  lr_decay_step: 100
+  lr_decay_step: 150
   lr_decay_gamma: 0.1
-  warm_up: 0
+  warm_up: 3
   EPOCHS: 200
   BATCH_SIZE: 64
-  LR: 0.0001
+  LR: 1.0e-4
   dropout: 0.05
 LOSS_WEIGHT:
   AUX:
@@ -50,10 +50,12 @@ LOSS_WEIGHT:
       EDGE: 2000
       NORMAL: 10
       NORM_EPOCH: 50
+  NORM:
+    UPSAMPLE: 1.0
 TB:
   SHOW_GAP: 200
-  SAVE_DIR: "none"
+  SAVE_DIR: "./output/log/exp"
 SAVE:
   SAVE_GAP: 10
-  SAVE_DIR: "none"
+  SAVE_DIR: "./output/model/exp"
 

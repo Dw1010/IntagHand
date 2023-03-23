@@ -92,6 +92,7 @@ class InterRender():
         if bg_img is None:
             bg_img = np.ones_like(img_out) * 255
         else:
+            bg_img = imgUtils.pad2squre(bg_img)
             bg_img = cv.resize(bg_img, (self.render_size, self.render_size))
 
         img_out = img_out * mask_out + bg_img * (1 - mask_out)

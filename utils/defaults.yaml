@@ -1,6 +1,8 @@
 SEED: 25
 MISC:
-  MANO_PATH: "misc/mano"
+  CKPT_PATH: "./"
+  MODEL_PATH: "misc/model/wild_demo.pth"
+  MANO_PATH: "mano_v1_2/models"
   GRAPH_LEFT_DICT_PATH: "misc/graph_left.pkl"
   GRAPH_RIGHT_DICT_PATH: "misc/graph_right.pkl"
   DENSE_COLOR: "misc/v_color.pkl"

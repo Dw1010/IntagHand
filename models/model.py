@@ -38,8 +38,6 @@ class HandNET_GCN(nn.Module):
 
 
 def load_model(cfg):
-    if isinstance(cfg, str):
-        cfg = load_cfg(cfg)
     encoder, mid_model = load_encoder(cfg)
     decoder = load_decoder(cfg, mid_model.get_info())
     model = HandNET_GCN(encoder, mid_model, decoder)
@@ -51,7 +49,7 @@ def load_model(cfg):
         print('load model params from {}'.format(path))
         try:
             model.load_state_dict(state)
-        except:
+        except Exception:
             state2 = {}
             for k, v in state.items():
                 state2[k[7:]] = v

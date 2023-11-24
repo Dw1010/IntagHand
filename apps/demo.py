@@ -1,62 +1,58 @@
-import numpy as np
-import torch
-import cv2 as cv
-import glob
 import os
+import glob
+import torch
 import argparse
-
-
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from models.model import load_model
-from utils.config import load_cfg
-from utils.utils import get_mano_path, imgUtils
-from dataset.dataset_utils import IMG_SIZE
+import cv2 as cv
+import numpy as np
 from core.test_utils import InterRender
+from utils.config import load_cfg
 
 
 def cut_img(img, bbox):
-    cut = img[max(int(bbox[2]), 0):min(int(bbox[3]), img.shape[0]),
-              max(int(bbox[0]), 0):min(int(bbox[1]), img.shape[1])]
-    cut = cv.copyMakeBorder(cut,
-                            max(int(-bbox[2]), 0),
-                            max(int(bbox[3] - img.shape[0]), 0),
-                            max(int(-bbox[0]), 0),
-                            max(int(bbox[1] - img.shape[1]), 0),
-                            borderType=cv.BORDER_CONSTANT,
-                            value=(0, 0, 0))
+    cut = img[
+        max(int(bbox[2]), 0) : min(int(bbox[3]), img.shape[0]),
+        max(int(bbox[0]), 0) : min(int(bbox[1]), img.shape[1]),
+    ]
+    cut = cv.copyMakeBorder(
+        cut,
+        max(int(-bbox[2]), 0),
+        max(int(bbox[3] - img.shape[0]), 0),
+        max(int(-bbox[0]), 0),
+        max(int(bbox[1] - img.shape[1]), 0),
+        borderType=cv.BORDER_CONSTANT,
+        value=(0, 0, 0),
+    )
     return cut
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cfg", type=str, default='misc/model/config.yaml')
-    parser.add_argument("--model", type=str, default='misc/model/wild_demo.pth')
-    parser.add_argument("--live_demo", action='store_true')
-    parser.add_argument("--img_path", type=str, default='demo/')
-    parser.add_argument("--save_path", type=str, default='demo/')
+    parser.add_argument("--cfg", type=str, default="misc/model/config.yaml")
+    parser.add_argument("--live_demo", action="store_true")
+    parser.add_argument("--img_path", type=str, default="demo/")
+    parser.add_argument("--save_path", type=str, default="demo/")
     parser.add_argument("--render_size", type=int, default=256)
     opt = parser.parse_args()
-
-    model = InterRender(cfg_path=opt.cfg,
-                        model_path=opt.model,
-                        render_size=opt.render_size)
+    cfg = load_cfg(opt.cfg)
+    model = InterRender(
+        cfg=cfg,
+        render_size=opt.render_size,
+    )
 
     if not opt.live_demo:
-        img_path_list = glob.glob(os.path.join(opt.img_path, '*.jpg')) + glob.glob(os.path.join(opt.img_path, '*.png'))
+        img_path_list = glob.glob(os.path.join(opt.img_path, "*.jpg"))
         for img_path in img_path_list:
             img_name = os.path.basename(img_path)
-            if img_name.find('output.jpg') != -1:
-                continue
-            img_name = img_name[:img_name.find('.')]
+            img_name = img_name[: img_name.find(".")]
             img = cv.imread(img_path)
             params = model.run_model(img)
             img_overlap = model.render(params, bg_img=img)
-            cv.imwrite(os.path.join(opt.save_path, img_name + '_output.jpg'), img_overlap)
+            cv.imwrite(
+                os.path.join(opt.save_path, img_name + "_output.jpg"), img_overlap
+            )
     else:
         video_reader = cv.VideoCapture(0)
-        fourcc = cv.VideoWriter_fourcc('M', 'J', 'P', 'G')
+        fourcc = cv.VideoWriter_fourcc("M", "J", "P", "G")
         video_reader.set(cv.CAP_PROP_FOURCC, fourcc)
 
         smooth = False
@@ -78,33 +74,64 @@ if __name__ == '__main__':
                 size = int(2 * w)
                 bbox = [left, left + size, top, top + size]
                 bbox = np.array(bbox).astype(np.int32)
-                crop_img = img[bbox[2]:bbox[3], bbox[0]:bbox[1]]
+                crop_img = img[bbox[2] : bbox[3], bbox[0] : bbox[1]]
 
                 params = model.run_model(crop_img)
-                if smooth and params_last is not None and params_v is not None and params_a is not None:
+                if (
+                    smooth
+                    and params_last is not None
+                    and params_v is not None
+                    and params_a is not None
+                ):
                     for k in params.keys():
                         if isinstance(params[k], torch.Tensor):
                             pred = params_last[k] + params_v[k] + 0.5 * params_a[k]
-                            params[k] = (0.7 * params[k] + 0.3 * pred)
+                            params[k] = 0.7 * params[k] + 0.3 * pred
 
                 img_out = model.render(params, bg_img=crop_img)
-                img[bbox[2]:bbox[3], bbox[0]:bbox[1]] = cv.resize(img_out, (size, size))
-                cv.line(img, (int(bbox[0]), int(bbox[2])), (int(bbox[0]), int(bbox[3])), (0, 0, 255), 2)
-                cv.line(img, (int(bbox[1]), int(bbox[2])), (int(bbox[1]), int(bbox[3])), (0, 0, 255), 2)
-                cv.line(img, (int(bbox[0]), int(bbox[2])), (int(bbox[1]), int(bbox[2])), (0, 0, 255), 2)
-                cv.line(img, (int(bbox[0]), int(bbox[3])), (int(bbox[1]), int(bbox[3])), (0, 0, 255), 2)
-                cv.imshow('cap', img)
+                img[bbox[2] : bbox[3], bbox[0] : bbox[1]] = cv.resize(
+                    img_out, (size, size)
+                )
+                cv.line(
+                    img,
+                    (int(bbox[0]), int(bbox[2])),
+                    (int(bbox[0]), int(bbox[3])),
+                    (0, 0, 255),
+                    2,
+                )
+                cv.line(
+                    img,
+                    (int(bbox[1]), int(bbox[2])),
+                    (int(bbox[1]), int(bbox[3])),
+                    (0, 0, 255),
+                    2,
+                )
+                cv.line(
+                    img,
+                    (int(bbox[0]), int(bbox[2])),
+                    (int(bbox[1]), int(bbox[2])),
+                    (0, 0, 255),
+                    2,
+                )
+                cv.line(
+                    img,
+                    (int(bbox[0]), int(bbox[3])),
+                    (int(bbox[1]), int(bbox[3])),
+                    (0, 0, 255),
+                    2,
+                )
+                cv.imshow("cap", img)
 
                 if params_last is not None:
                     params_v = {}
                     for k in params.keys():
                         if isinstance(params[k], torch.Tensor):
-                            params_v[k] = (params[k] - params_last[k])
+                            params_v[k] = params[k] - params_last[k]
                 if params_last_v is not None and params_v is not None:
                     params_a = {}
                     for k in params.keys():
                         if isinstance(params[k], torch.Tensor):
-                            params_a[k] = (params_v[k] - params_last_v[k])
+                            params_a[k] = params_v[k] - params_last_v[k]
                 params_last = params
                 params_last_v = params_v
 

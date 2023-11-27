@@ -118,7 +118,7 @@ class InterRender:
 
         img_out = img_out * mask_out + bg_img * (1 - mask_out)
         img_out = img_out.astype(np.uint8)
-        return img_out
+        return img_out, bg_img
 
     @torch.no_grad()
     def render_other_view(self, params, theta=60):

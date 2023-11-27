@@ -40,16 +40,16 @@ if __name__ == "__main__":
     )
 
     if not opt.live_demo:
+        os.makedirs(opt.save_path, exist_ok=True)
         img_path_list = glob.glob(os.path.join(opt.img_path, "*.jpg"))
         for img_path in img_path_list:
             img_name = os.path.basename(img_path)
             img_name = img_name[: img_name.find(".")]
             img = cv.imread(img_path)
             params = model.run_model(img)
-            img_overlap = model.render(params, bg_img=img)
-            cv.imwrite(
-                os.path.join(opt.save_path, img_name + "_output.jpg"), img_overlap
-            )
+            img_overlap, bg_img = model.render(params, bg_img=img)
+            save_img = cv.hconcat([bg_img, img_overlap])
+            cv.imwrite(os.path.join(opt.save_path, img_name + "_output.jpg"), save_img)
     else:
         video_reader = cv.VideoCapture(0)
         fourcc = cv.VideoWriter_fourcc("M", "J", "P", "G")
